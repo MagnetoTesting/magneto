@@ -160,7 +160,7 @@ class MagnetoDeviceObject(AutomatorDeviceObject):
         super(MagnetoDeviceObject, self).__init__(device, selector)
 
     def center(self):
-        return get_center(self.info['bounds'])
+        return get_center(self.info['visibleBounds'])
 
     def child(self, **kwargs):
         """set childSelector."""
