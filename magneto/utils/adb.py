@@ -4,6 +4,7 @@ import re
 import threading
 from functools import wraps
 from concurrent.futures import Future, wait
+import time
 
 from ..logger import Logger
 
@@ -202,7 +203,7 @@ class ADBLogWatch(threading.Thread):
     def watch_compiled(self, pattern, min_times=1):
         self._watchers[pattern] = Future(), min_times
 
-    def assert_done(self, timeout=15):
+    def assert_done(self, timeout=15, stall=None):
         """
         Asserts if all watches exist in log.
 
@@ -211,15 +212,25 @@ class ADBLogWatch(threading.Thread):
 
         Logger.debug('waiting up to {} seconds for {} watchers'.format(timeout, len(self._watchers)))
         futures = [future for (future, _) in self._watchers.itervalues()]
+
+        start_time = time.time()
         done, pending = wait(futures, timeout=timeout)
-        if pending:
-            patterns_left = '\n'.join('pattern: {}'.format(r.pattern) for r in self._watchers)
-            raise AssertionError(
-                'assert_done failure.\nWaited {} seconds but still have {} watchers:\n{}'
-                .format(timeout, len(self._watchers), patterns_left)
-            )
-        else:
+        if not pending:
             Logger.debug('watchers done')
+            return
+
+        if stall:
+            stall_time = stall-int(time.time() - start_time)
+            Logger.debug('Stalling for another %d seconds' % stall_time)
+            done, pending = wait(futures, timeout=stall_time)
+            if not pending:
+                Logger.debug('watchers done')
+
+        patterns_left = '\n'.join('pattern: {}'.format(r.pattern) for r in self._watchers)
+        raise AssertionError(
+            'assert_done failure.\nWaited {} seconds but still have {} watchers:\n{}'
+            .format(timeout, len(self._watchers), patterns_left)
+        )
 
 
 class ADBVideoCapture(threading.Thread):
