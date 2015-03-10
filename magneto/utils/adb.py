@@ -135,12 +135,11 @@ class ADBLogWatch(threading.Thread):
 
             from magneto.utils.adb import ADBLogWatch
 
-            @ADBLogWatch.wrap
             def test_button_click_log(self, watcher):
-
-                watcher.watch('button clicked')
-                self.magneto(text='Click here').click()
-                watcher.assert_done()
+                with ADBLogWatch() as watcher:
+                    watcher.watch('button clicked')
+                    self.magneto(text='Click here').click()
+                    watcher.assert_done()
     """
 
     def __init__(self):
@@ -207,7 +206,28 @@ class ADBLogWatch(threading.Thread):
         """
         Asserts if all watches exist in log.
 
-        :param timeout: Amount of time seconds to wait for watches to appear in log. Defaults to 5 seconds.
+        :param timeout: Amount of time in seconds to wait for watches to appear in log. Defaults to 5 seconds.
+        :param stall: Amount of time in seconds to keep waiting before exiting the wait. More info in https://github.com/EverythingMe/magneto/issues/1
+
+        Example::
+
+            from magneto.utils.adb import ADBLogWatch
+
+            def test_incoming_call(self, watcher):
+                with ADBLogWatch() as watcher:
+                    watcher.watch('call arrived')
+                    call_device()
+                    watcher.assert_done()
+
+        Example with stall::
+
+            from magneto.utils.adb import ADBLogWatch
+
+            def test_incoming_call(self, watcher):
+                with ADBLogWatch() as watcher:
+                    watcher.watch('call arrived')
+                    call_device()
+                    watcher.assert_done(timeout=10, stall=120)
         """
 
         Logger.debug('waiting up to {} seconds for {} watchers'.format(timeout, len(self._watchers)))
