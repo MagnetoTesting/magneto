@@ -8,6 +8,7 @@ Droids at your command
    :maxdepth: 2
 
    setup.rst
+   demo.rst
    creating_tests.rst
    api.rst
    known_issues.rst
