@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.1.3',
+    version='0.1.4',
     description='Magneto - Command your droids.',
     author='EverythingMe',
     author_email='automation@everything.me',
@@ -19,7 +19,8 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'magneto = magneto.main:main'
+            'magneto = magneto.main:main',
+            'imagneto = magneto.imagneto:main'
         ]
     },
 
