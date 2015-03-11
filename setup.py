@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.1.2',
+    version='0.1.3',
     description='Magneto - Command your droids.',
     author='EverythingMe',
     author_email='automation@everything.me',
@@ -13,7 +13,8 @@ setup(
         'pytest-ordering',
         'uiautomator',
         'futures',
-        'coloredlogs'
+        'coloredlogs',
+        'IPython'
     ],
 
     entry_points={
