@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.1.5',
+    version='0.1.6a',
     description='Magneto - Command your droids.',
     author='EverythingMe',
     author_email='automation@everything.me',

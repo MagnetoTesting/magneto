@@ -2,7 +2,7 @@ import threading
 import time
 import itertools
 
-from uiautomator import AutomatorDevice, AutomatorDeviceObject, Selector
+from uiautomator import AutomatorDevice, AutomatorDeviceObject, Selector, param_to_property
 
 from .utils import get_center, Timeout, TimeoutError, get_config
 from .utils.adb import ADB
@@ -175,6 +175,20 @@ class MagnetoDeviceObject(AutomatorDeviceObject):
             self.device,
             self.selector.clone().sibling(**kwargs)
         )
+
+    @property
+    def click(self):
+        """
+        Substitute click with in-place swipe
+        """
+        @param_to_property(action=["tl", "topleft", "br", "bottomright", "wait"])
+        def _click(action=None, timeout=3000):
+            if action is None:
+                x, y = self.center()
+                return self.device.swipe(x, y, x, y, steps=10)
+            else:
+                return super(MagnetoDeviceObject, self).click(action, timeout)
+        return _click
 
 
 class MagnetoException(Exception):
