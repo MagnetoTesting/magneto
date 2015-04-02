@@ -169,6 +169,13 @@ class MagnetoDeviceObject(AutomatorDeviceObject):
             self.selector.clone().child(**kwargs)
         )
 
+    def sibling(self, **kwargs):
+        """set fromParent selector."""
+        return MagnetoDeviceObject(
+            self.device,
+            self.selector.clone().sibling(**kwargs)
+        )
+
 
 class MagnetoException(Exception):
     pass
