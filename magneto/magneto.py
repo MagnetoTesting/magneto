@@ -118,7 +118,7 @@ class Magneto(threading.local, AutomatorDevice):
         el.wait.exists(timeout=timeout)
         return el
 
-    def wait_for_true(self, function, timeout=15000):
+    def wait_for_true(self, function, timeout=15000, **kwargs):
         """
         Waits for given function to return True::
 
@@ -133,7 +133,7 @@ class Magneto(threading.local, AutomatorDevice):
         try:
             with Timeout(seconds=timeout/1000):
                 while not result:
-                    result = function()
+                    result = function(**kwargs)
                     time.sleep(0.5)
 
         except TimeoutError:
