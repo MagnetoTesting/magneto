@@ -196,10 +196,10 @@ class ADBLogWatch(threading.Thread):
         :param pattern: Regular expression pattern to perform on logcat lines
         :param int min_times: Minimum times a certain pattern should appear in log
         """
-        Logger.debug('watching pattern "{}"'.format(pattern))
         self.watch_compiled(re.compile(pattern), **kwargs)
 
     def watch_compiled(self, pattern, min_times=1):
+        Logger.debug('watching pattern "{}"'.format(pattern.pattern))
         self._watchers[pattern] = Future(), min_times
 
     def assert_done(self, timeout=15, stall=None):
