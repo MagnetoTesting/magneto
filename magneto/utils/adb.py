@@ -213,8 +213,9 @@ class ADBLogWatch(threading.Thread):
             self.watch_compiled(re.compile(pattern), **kwargs)
 
     def watch_compiled(self, pattern, min_times=1):
-        Logger.debug('watching pattern "{}"'.format(pattern.pattern))
-        self._watchers[RegexMatcher(pattern)] = Future(), min_times
+        regex_matcher = RegexMatcher(pattern)
+        Logger.debug('watching pattern "{}"'.format(str(regex_matcher)))
+        self._watchers[regex_matcher] = Future(), min_times
 
     def assert_done(self, timeout=15, stall=None):
         """
@@ -260,7 +261,7 @@ class ADBLogWatch(threading.Thread):
             if not pending:
                 Logger.debug('watchers done')
 
-        patterns_left = '\n'.join('pattern: {}'.format(r.pattern) for r in self._watchers)
+        patterns_left = '\n'.join('pattern: {}'.format(str(pattern)) for r in self._watchers)
         raise AssertionError(
             'assert_done failure.\nWaited {} seconds but still have {} watchers:\n{}'
             .format(timeout, len(self._watchers), patterns_left)
