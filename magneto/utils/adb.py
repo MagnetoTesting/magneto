@@ -129,6 +129,17 @@ class ADB(object):
         cls.exec_cmd("shell \"su -c 'date -s {adb_date}'\"".format(adb_date=adb_date)).wait()
 
 
+class RegexMatcher(object):
+    def __init__(self, pattern):
+        self._pattern = pattern
+
+    def __call__(self, line):
+        return self._pattern.search(line)
+
+    def __str__(self):
+        return self._pattern.pattern[:20]+'...'
+
+
 class ADBLogWatch(threading.Thread):
     """
     Enables watching adb logcat logs and asserting that they certain ones appeared::
@@ -170,17 +181,16 @@ class ADBLogWatch(threading.Thread):
             line = p.stdout.readline().strip()
             if line == '':
                 break
-            for pattern, (future, min_times) in self._watchers.items():
-                match = pattern.search(line)
+            for matcher, (future, min_times) in self._watchers.items():
+                match = matcher(line)
                 if match:
-                    short_pattern = pattern.pattern[:20]+'...'
-                    Logger.debug('Found logcat for "{}" ({})'.format(short_pattern, min_times))
+                    Logger.debug('Found logcat for "{}"'.format(matcher))
                     if min_times == 1:
                         future.set_result(line)
-                        Logger.debug('Removing watch "{}"'.format(short_pattern))
-                        del self._watchers[pattern]
+                        Logger.debug('Removing watch "{}"'.format(matcher))
+                        del self._watchers[matcher]
                     else:
-                        self._watchers[pattern] = future, min_times - 1
+                        self._watchers[matcher] = future, min_times - 1
 
         p.terminate()
         Logger.debug('ADB logcat process terminated')
@@ -196,11 +206,15 @@ class ADBLogWatch(threading.Thread):
         :param pattern: Regular expression pattern to perform on logcat lines
         :param int min_times: Minimum times a certain pattern should appear in log
         """
-        self.watch_compiled(re.compile(pattern), **kwargs)
+        if callable(pattern):
+            Logger.debug('watching pattern "{}"'.format(str(pattern)))
+            self._watchers[pattern] = Future(), kwargs.get('min_times', 1)
+        else:
+            self.watch_compiled(re.compile(pattern), **kwargs)
 
     def watch_compiled(self, pattern, min_times=1):
         Logger.debug('watching pattern "{}"'.format(pattern.pattern))
-        self._watchers[pattern] = Future(), min_times
+        self._watchers[RegexMatcher(pattern)] = Future(), min_times
 
     def assert_done(self, timeout=15, stall=None):
         """
