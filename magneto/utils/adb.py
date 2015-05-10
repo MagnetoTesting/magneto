@@ -261,7 +261,7 @@ class ADBLogWatch(threading.Thread):
             if not pending:
                 Logger.debug('watchers done')
 
-        patterns_left = '\n'.join('pattern: {}'.format(str(pattern)) for r in self._watchers)
+        patterns_left = '\n'.join('pattern: {}'.format(str(r)) for r in self._watchers)
         raise AssertionError(
             'assert_done failure.\nWaited {} seconds but still have {} watchers:\n{}'
             .format(timeout, len(self._watchers), patterns_left)
