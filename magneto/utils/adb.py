@@ -152,6 +152,7 @@ class ADBLogWatch(threading.Thread):
                     self.magneto(text='Click here').click()
                     watcher.assert_done()
     """
+    instance = None
 
     def __init__(self):
         ADB.clear_log().wait()
@@ -169,11 +170,16 @@ class ADBLogWatch(threading.Thread):
         return wrapper
 
     def __enter__(self, *_):
+        if self.__class__.instance is not None:
+            raise RuntimeError('Only one instance of {} is allowed at any time.'.format(self.__class__.__name__))
+
+        self.__class__.instance = self
         self.start()
         return self
 
     def __exit__(self, *_):
         self.exit()
+        self.__class__.instance = None
 
     def run(self):
         p = ADB.exec_cmd('logcat', stdout=subprocess.PIPE)
@@ -208,19 +214,26 @@ class ADBLogWatch(threading.Thread):
         """
         if callable(pattern):
             Logger.debug('watching pattern "{}"'.format(str(pattern)))
-            self._watchers[pattern] = Future(), kwargs.get('min_times', 1)
+            future = Future()
+            self._watchers[pattern] = future, kwargs.get('min_times', 1)
+
+            return future
         else:
-            self.watch_compiled(re.compile(pattern), **kwargs)
+            return self.watch_compiled(re.compile(pattern), **kwargs)
 
     def watch_compiled(self, pattern, min_times=1):
         regex_matcher = RegexMatcher(pattern)
         Logger.debug('watching pattern "{}"'.format(str(regex_matcher)))
-        self._watchers[regex_matcher] = Future(), min_times
+        future = Future()
+        self._watchers[regex_matcher] = future, min_times
 
-    def assert_done(self, timeout=15, stall=None):
+        return future
+
+    def assert_done(self, timeout=15, stall=None, futures=None):
         """
-        Asserts if all watches exist in log.
+        Asserts if all/some watches exist in log.
 
+        :param futures: The futures we want to wait to end
         :param timeout: Amount of time in seconds to wait for watches to appear in log. Defaults to 5 seconds.
         :param stall: Amount of time in seconds to keep waiting before exiting the wait. More info in https://github.com/EverythingMe/magneto/issues/1
 
@@ -245,8 +258,13 @@ class ADBLogWatch(threading.Thread):
                     watcher.assert_done(timeout=10, stall=120)
         """
 
-        Logger.debug('waiting up to {} seconds for {} watchers'.format(timeout, len(self._watchers)))
-        futures = [future for (future, _) in self._watchers.itervalues()]
+        if futures:
+            if not isinstance(futures, list):
+                futures = [futures]
+        else:
+            futures = [future for (future, _) in self._watchers.itervalues()]
+
+        Logger.debug('waiting up to {} seconds for {} watchers'.format(timeout, len(futures)))
 
         start_time = time.time()
         done, pending = wait(futures, timeout=timeout)
@@ -266,6 +284,16 @@ class ADBLogWatch(threading.Thread):
             'assert_done failure.\nWaited {} seconds but still have {} watchers:\n{}'
             .format(timeout, len(self._watchers), patterns_left)
         )
+
+    def assert_watch(self, *args, **kwargs):
+        """
+        Asserts specific watchers if they exists in log
+
+        :param args: <Future> all watchers we want to wait to end
+        :param kwargs: extra params to pass to assert_done like timeout..
+        :return: self.asset_done
+        """
+        return self.assert_done(futures=list(args), **kwargs)
 
 
 class ADBVideoCapture(threading.Thread):
