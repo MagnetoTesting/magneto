@@ -1,8 +1,9 @@
 import threading
 import time
 import itertools
+import os
 
-from uiautomator import AutomatorDevice, AutomatorDeviceObject, Selector
+from uiautomator import AutomatorDevice, AutomatorDeviceObject, AutomatorServer, Selector
 
 from .utils import get_center, Timeout, TimeoutError, get_config
 from .utils.adb import ADB
@@ -31,6 +32,14 @@ class Magneto(threading.local, AutomatorDevice):
         cls._manufacturer = ADB.getprop('ro.product.manufacturer').lower()
         cls._args = args
         cls._kwargs = kwargs
+
+    def __init__(self, serial=None, local_port=None, adb_server_host=None, adb_server_port=None):
+        self.server = MagnetoAutomatorServer(
+            serial=serial,
+            local_port=local_port,
+            adb_server_host=adb_server_host,
+            adb_server_port=adb_server_port
+        )
 
     def __call__(self, *args, **kwargs):
         el = MagnetoDeviceObject(self, Selector(**kwargs))
@@ -175,6 +184,63 @@ class MagnetoDeviceObject(AutomatorDeviceObject):
             self.device,
             self.selector.clone().sibling(**kwargs)
         )
+
+
+class MagnetoAutomatorServer(AutomatorServer):
+    __custom_jar_files = {
+        "bundle.jar": "libs/android.test.runner.jar",
+        "uiautomator": "libs/uiautomator",
+        "uiautomator.jar": "libs/uiautomator.jar"
+    }
+
+    def __init__(self, **kwargs):
+        super(MagnetoAutomatorServer, self).__init__(**kwargs)
+
+        base_dir = os.path.dirname(__file__)
+        for jar, jar_path in self.__custom_jar_files.items():
+            filename = os.path.join(base_dir, jar_path)
+            self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+
+        self.adb.cmd("shell", "su", "-c", "chmod", "555", "/data/local/tmp/uiautomator").wait()
+
+    def start(self, timeout=5):
+        files = self.push()
+        cmd = list(itertools.chain(
+            ["shell", "/data/local/tmp/uiautomator", "runtest"],
+            files,
+            ["-c", "com.github.uiautomatorstub.Stub"]
+        ))
+        self.uiautomator_process = self.adb.cmd(*cmd)
+        self.adb.forward(self.local_port, self.device_port)
+
+        while not self.alive and timeout > 0:
+            time.sleep(0.1)
+            timeout -= 0.1
+        if not self.alive:
+            raise IOError("RPC server not started!")
+
+    def stop(self):
+        '''Stop the rpc server.'''
+        if self.uiautomator_process and self.uiautomator_process.poll() is None:
+            res = None
+            try:
+                res = urllib2.urlopen(self.stop_uri)
+                self.uiautomator_process.wait()
+            except:
+                self.uiautomator_process.kill()
+            finally:
+                if res is not None:
+                    res.close()
+                self.uiautomator_process = None
+        try:
+            out = self.adb.cmd("shell", "ps", "-C", "/data/local/tmp/uiautomator").communicate()[0].decode("utf-8").strip().splitlines()
+            if out:
+                index = out[0].split().index("PID")
+                for line in out[1:]:
+                    if len(line.split()) > index:
+                        self.adb.cmd("shell", "kill", "-9", line.split()[index]).wait()
+        except:
+            pass
 
 
 class MagnetoException(Exception):
