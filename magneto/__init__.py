@@ -220,7 +220,7 @@ class MagnetoAutomatorServer(AutomatorServer):
             raise IOError("RPC server not started!")
 
     def stop(self):
-        '''Stop the rpc server.'''
+        """Stop the rpc server."""
         if self.uiautomator_process and self.uiautomator_process.poll() is None:
             res = None
             try:
