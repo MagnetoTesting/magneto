@@ -187,8 +187,13 @@ class MagnetoDeviceObject(AutomatorDeviceObject):
 
 
 class MagnetoAutomatorServer(AutomatorServer):
+    __jar_files = {
+        "bundle.jar": "libs/bundle.jar",
+        "uiautomator-stub.jar": "libs/uiautomator-stub.jar"
+    }
+
     __custom_jar_files = {
-        "bundle.jar": "libs/android.test.runner.jar",
+        "android.test.runner.jar": "libs/android.test.runner.jar",
         "uiautomator": "libs/uiautomator",
         "uiautomator.jar": "libs/uiautomator.jar"
     }
@@ -202,6 +207,13 @@ class MagnetoAutomatorServer(AutomatorServer):
             self.adb.cmd("push", filename, "/data/local/tmp/").wait()
 
         self.adb.cmd("shell", "su", "-c", "chmod", "555", "/data/local/tmp/uiautomator").wait()
+
+    def push(self):
+        base_dir = os.path.dirname(__file__)
+        for jar, url in self.__jar_files.items():
+            filename = os.path.join(base_dir, url)
+            self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+        return list(self.__jar_files.keys())
 
     def start(self, timeout=5):
         files = self.push()
