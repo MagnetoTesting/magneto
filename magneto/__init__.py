@@ -201,12 +201,15 @@ class MagnetoAutomatorServer(AutomatorServer):
     def __init__(self, **kwargs):
         super(MagnetoAutomatorServer, self).__init__(**kwargs)
 
-        base_dir = os.path.dirname(__file__)
-        for jar, jar_path in self.__custom_jar_files.items():
-            filename = os.path.join(base_dir, jar_path)
-            self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+        sdk_int = int(self.adb.cmd("shell", "getprop", "ro.build.version.sdk").communicate()[0].strip())
 
-        self.adb.cmd("shell", "su", "-c", "chmod", "555", "/data/local/tmp/uiautomator").wait()
+        if sdk_int > 20:
+            base_dir = os.path.dirname(__file__)
+            for jar, jar_path in self.__custom_jar_files.items():
+                filename = os.path.join(base_dir, jar_path)
+                self.adb.cmd("push", filename, "/data/local/tmp/").wait()
+
+            self.adb.cmd("shell", "su", "-c", "chmod", "555", "/data/local/tmp/uiautomator").wait()
 
     def push(self):
         base_dir = os.path.dirname(__file__)
