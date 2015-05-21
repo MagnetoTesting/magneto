@@ -44,7 +44,10 @@ class MagnetoPlugin(object):
 
             if clean_install:
                 ADB.uninstall(app_package)
-            ADB.install(apk_path, '-r')
+            apk_installed = ADB.install(apk_path, '-r')
+
+            if not apk_installed:
+                raise RuntimeError('Could not install apk.')
 
         # launch app
         ADB.exec_cmd('shell am start {0}/{1}'.format(app_package, app_activity)).wait()

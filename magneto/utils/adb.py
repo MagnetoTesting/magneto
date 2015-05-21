@@ -113,10 +113,21 @@ class ADB(object):
         cls.exec_cmd('shell su -c "rm -rf /data/data/{0}"'.format(package_name)).wait()
 
     @classmethod
-    def install(cls, apk_path, extra_params=''):
+    def install(cls, apk_path, extra_params='', retry=True):
         Logger.debug('Installing app {}'.format(apk_path))
-        cls.exec_cmd('install {} {}'.format(extra_params, apk_path)).wait()
-        Logger.debug('App installed')
+        p = cls.exec_cmd('install {} {}'.format('', apk_path), stdout=subprocess.PIPE)
+        result = p.communicate()[0].strip().split('\r\n')[-1]
+
+        if result == 'Success':
+            Logger.debug('App installed')
+            return True
+        elif result != 'Success' and retry:
+            Logger.debug('App install failed: {}'.format(result))
+            Logger.debug('Retrying install...')
+            return cls.install(apk_path, extra_params=extra_params, retry=False)
+        else:
+            Logger.debug('App install failed: {}'.format(result))
+            return False
 
     @classmethod
     def getprop(cls, prop):
