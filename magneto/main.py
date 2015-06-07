@@ -73,7 +73,7 @@ def main(log):
 
 
 @main.command(context_settings=dict(
-    ignore_unknown_options=False,
+    ignore_unknown_options=True,
     allow_extra_args=True,
 ))
 @click.argument('tests_path', default='.')
@@ -82,6 +82,12 @@ def run(ctx, tests_path):
     pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
 
 
+@main.command()
+@click.argument('app', default='no_app')
+def init(app):
+    from .utils import Bootstrap
+
+    Bootstrap(app)
 
 
 if __name__ == '__main__':

@@ -3,8 +3,12 @@ from contextlib import contextmanager
 from multiprocessing import TimeoutError
 import signal
 import datetime
+import os
 import subprocess
 import time
+import urllib
+import zipfile
+import shutil
 
 import pytest
 
@@ -106,7 +110,7 @@ def unlock_device():
 
     # read device screen state
     p = ADB.exec_cmd("shell 'if [ -z $(dumpsys power | grep mScreenOn=true) ]; then echo off; else echo on;fi'",
-            stdout=subprocess.PIPE)
+                     stdout=subprocess.PIPE)
     device_screen = p.stdout.readline().strip('\r\n')
 
     if device_screen == 'off':
@@ -136,3 +140,28 @@ def wait_for_device():
     except TimeoutError:
         Logger.debug('Timed out while waiting for sys.boot_completed, there might not be a default launcher set, trying to run anyway')
         pass
+
+
+class Bootstrap(object):
+    _map = {
+        'calc': 'https://github.com/EverythingMe/magneto-demo-calc/archive/master.zip'
+    }
+
+    def __init__(self, name):
+        if name not in self._map:
+            raise Exception('{} not recognized'.format(name))
+
+        filename, headers = urllib.urlretrieve(self._map[name])
+
+        with zipfile.ZipFile(filename) as zip_file:
+            rootdir = zip_file.namelist()[0]
+            for member in zip_file.namelist()[1:]:
+                if not os.path.basename(member):
+                    # create dir from zipfile
+                    os.mkdir(os.path.join(os.path.curdir, member.replace(rootdir, '')))
+                else:
+                    # copy file (taken from zipfile's extract)
+                    source = zip_file.open(member)
+                    target = file(os.path.join(os.path.curdir, member.replace(rootdir, '')), "wb")
+                    with source, target:
+                        shutil.copyfileobj(source, target)
