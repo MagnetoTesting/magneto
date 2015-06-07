@@ -14,7 +14,8 @@ setup(
         'uiautomator',
         'futures',
         'coloredlogs',
-        'IPython'
+        'IPython',
+        'Click'
     ],
 
     entry_points={

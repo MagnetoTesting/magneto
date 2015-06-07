@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse
+import click
 import logging
 import os
 import pytest
@@ -65,17 +65,20 @@ class MagnetoPlugin(object):
         return report
 
 
-def main():
-    parser = argparse.ArgumentParser(description='.')
-    parser.add_argument('tests_path', type=str, help='ui test directory')
-    parser.add_argument('--log', type=str, default='INFO', help='logging level. default:INFO')
-
-    args, other = parser.parse_known_args()
-
-    numeric_level = getattr(logging, args.log.upper(), None)
+@main.command(context_settings=dict(
+    ignore_unknown_options=False,
+    allow_extra_args=True,
+))
+@click.argument('tests_path', default='.')
+@click.option('--log', default='INFO', help='logging level. default:INFO')
+@click.pass_context
+def main(ctx, tests_path, log):
+    numeric_level = getattr(logging, log.upper(), None)
     Logger.setLevel(numeric_level)
 
-    pytest.main(['-sv', args.tests_path] + other, plugins=[MagnetoPlugin()])
+    pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
+
+
 
 
 if __name__ == '__main__':
