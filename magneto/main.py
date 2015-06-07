@@ -65,17 +65,20 @@ class MagnetoPlugin(object):
         return report
 
 
+@click.group()
+@click.option('--log', default='INFO', help='logging level. default:INFO')
+def main(log):
+    numeric_level = getattr(logging, log.upper(), None)
+    Logger.setLevel(numeric_level)
+
+
 @main.command(context_settings=dict(
     ignore_unknown_options=False,
     allow_extra_args=True,
 ))
 @click.argument('tests_path', default='.')
-@click.option('--log', default='INFO', help='logging level. default:INFO')
 @click.pass_context
-def main(ctx, tests_path, log):
-    numeric_level = getattr(logging, log.upper(), None)
-    Logger.setLevel(numeric_level)
-
+def run(ctx, tests_path):
     pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
 
 
