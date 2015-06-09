@@ -115,7 +115,7 @@ class ADB(object):
     @classmethod
     def install(cls, apk_path, extra_params='', retry=True):
         Logger.debug('Installing app {}'.format(apk_path))
-        p = cls.exec_cmd('install {} {}'.format('', apk_path), stdout=subprocess.PIPE)
+        p = cls.exec_cmd('install {} {}'.format(extra_params, apk_path), stdout=subprocess.PIPE)
         result = p.communicate()[0].strip().split('\r\n')[-1]
 
         if result == 'Success':
