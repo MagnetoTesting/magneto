@@ -16,7 +16,8 @@ Quick start
 -----------
 ```bash
 $ pip install magneto
-$ magneto <TEST_DIR> --apk-path <PATH_TO_APK> --app-package <APK_PACKAGE_NAME> --app-activity <APP_ACTIVITY>
+$ magneto init calc
+$ magneto run tests/
 ```
 
 

@@ -66,7 +66,7 @@ Magneto allows attaching tags to test cases and tests alike, using ``@tag.TAG_NA
 
 Now I can choose to run only ``CardsTestCase`` using ``-k cards``::
 
-    $ magneto ui_tests/ -k cards
+    $ magneto run ui_tests/ -k cards
 
 .. _skipping:
 
