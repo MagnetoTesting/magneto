@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.3',
-    description='Magneto - Command your droids.',
+    version='0.31',
+    description='Magneto - Test Automation for Android',
     author='EverythingMe',
     author_email='automation@everything.me',
     url='http://github.com/EverythingMe/magneto',

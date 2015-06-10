@@ -144,6 +144,7 @@ def wait_for_device():
 
 class Bootstrap(object):
     _map = {
+        'no_app': 'https://github.com/EverythingMe/magneto-init/archive/master.zip',
         'calc': 'https://github.com/EverythingMe/magneto-demo-calc/archive/master.zip'
     }
 
