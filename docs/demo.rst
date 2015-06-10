@@ -3,10 +3,23 @@
 Run the demo
 ============
 
-In magneto-demo-calc_ you can find the Lollipop calculator app.
-Clone or download Magneto source from Github__ and run the following terminal command::
+Install magento::
 
-    $ magneto run tests/
+  $ pip install magneto
 
-.. _magneto-demo-calc: https://github.com/EverythingMe/magneto-demo-calc
-__ magneto-demo-calc_
+Enter a new folder::
+
+  $ mkdir calc
+  $ cd calc
+
+Init the calc demo::
+
+  $ magneto init calc
+
+Run the tests::
+
+  $ magneto run tests/
+
+This will install the app on your device, run the tests and display a final report.
+
+Here's a `quick video showcasing the demo <https://www.youtube.com/watch?v=wDPfbhAaqZI>`_

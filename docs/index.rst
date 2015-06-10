@@ -1,8 +1,4 @@
-Magneto
-=======
-Droids at your command
-----------------------
-.. image:: _static/magneto.jpg
+.. image:: _static/magneto.png
 
 .. toctree::
    :maxdepth: 2
