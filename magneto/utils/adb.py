@@ -171,6 +171,11 @@ class ADBLogWatch(threading.Thread):
         self._watchers = {}
         self.asked_to_stop = False
 
+        if self.__class__.instance is not None:
+            raise RuntimeError('Only one instance of {} is allowed at any time.'.format(self.__class__.__name__))
+
+        self.__class__.instance = self
+
     @classmethod
     def wrap(cls, fn):
         @wraps(fn)
@@ -181,16 +186,11 @@ class ADBLogWatch(threading.Thread):
         return wrapper
 
     def __enter__(self, *_):
-        if self.__class__.instance is not None:
-            raise RuntimeError('Only one instance of {} is allowed at any time.'.format(self.__class__.__name__))
-
-        self.__class__.instance = self
         self.start()
         return self
 
     def __exit__(self, *_):
         self.exit()
-        self.__class__.instance = None
 
     def run(self):
         p = ADB.exec_cmd('logcat', stdout=subprocess.PIPE)
@@ -213,6 +213,7 @@ class ADBLogWatch(threading.Thread):
         Logger.debug('ADB logcat process terminated')
 
     def exit(self):
+        self.__class__.instance = None
         self.asked_to_stop = True
         self.join()
 
