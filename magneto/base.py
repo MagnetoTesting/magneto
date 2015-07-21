@@ -60,13 +60,34 @@ class BaseTestCase(object):
 
     @classmethod
     def pytest_runtest_setup(cls, item, report):
-        cls.test_number += 1
-        cls.current_test = '{number}-{name}'.format(number=cls.test_number, name=item.name)
-        if not report.skipped and get_config('--save-data-on-failure') and get_config('--include-video-on-failure'):
-            cls.video_thread = ADBVideoCapture(cls.current_test)
+        cls._finish_test(item, report)
 
     @classmethod
     def pytest_runtest_call(cls, item, report):
+        cls._finish_test(item, report)
+
+    @classmethod
+    def pytest_runtest_teardown(cls, *_):
+        ADB.clear_log()
+        if cls.video_thread:
+            cls.video_thread.delete_files()
+            cls.video_thread = None
+
+    def setup_method(self, method):
+        BaseTestCase._start_test(method.__name__)
+
+    def teardown_method(self, method):
+        pass
+
+    @classmethod
+    def _start_test(cls, test_name):
+        cls.test_number += 1
+        cls.current_test = '{number}-{name}'.format(number=cls.test_number, name=test_name)
+        if get_config('--save-data-on-failure') and get_config('--include-video-on-failure'):
+            cls.video_thread = ADBVideoCapture(cls.current_test)
+
+    @classmethod
+    def _finish_test(cls, item, report):
         if cls.video_thread:
             cls.video_thread.stop_recording()
         if report.failed:
@@ -101,16 +122,3 @@ class BaseTestCase(object):
                 if cls.video_thread:
                     Logger.debug('Saving test video')
                     cls.video_thread.save_files(data_path)
-
-    @classmethod
-    def pytest_runtest_teardown(cls, *_):
-        ADB.clear_log()
-        if cls.video_thread:
-            cls.video_thread.delete_files()
-            cls.video_thread = None
-
-    def setup_method(self, method):
-        pass
-
-    def teardown_method(self, method):
-        pass
