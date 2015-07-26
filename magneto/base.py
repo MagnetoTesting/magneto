@@ -88,7 +88,7 @@ class BaseTestCase(object):
 
     @classmethod
     def _finish_test(cls, item, report):
-        if cls.video_thread:
+        if cls.video_thread and ((report.when == 'setup' and report.failed) or report.when == 'call'):
             cls.video_thread.stop_recording()
         if report.failed:
             if 'blocker' in item.keywords:
