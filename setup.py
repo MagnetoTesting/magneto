@@ -10,10 +10,8 @@ setup(
     packages=find_packages(),
     install_requires=[
         'pytest',
-        'pytest-ordering==0.3',
         'uiautomator',
         'futures',
-        'coloredlogs',
         'IPython',
         'Click'
     ],
