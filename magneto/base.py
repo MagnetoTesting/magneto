@@ -49,8 +49,6 @@ class BaseTestCase(object):
     @classmethod
     def unconfigure(cls, *_):
         if BaseTestCase.magneto:
-            if not BaseTestCase.blocker_failed:
-                BaseTestCase.magneto.press.home()
             BaseTestCase.magneto.server.stop()
             BaseTestCase.magneto = None
             BaseTestCase.video_thread = None
@@ -91,15 +89,6 @@ class BaseTestCase(object):
         if cls.video_thread and ((report.when == 'setup' and report.failed) or report.when == 'call'):
             cls.video_thread.stop_recording()
         if report.failed:
-            if 'blocker' in item.keywords:
-                cls.blocker_failed = True
-                for test in item.session.items:
-                    if test.name != item.name and test._request:
-                        test._request.applymarker(
-                            pytest.mark.skipif(True,
-                                               reason="{0} blocker failed, skipping remaining tests.".format(
-                                                   item.name)))
-
             if get_config('--save-data-on-failure'):
                 data_path_suffix = get_config('--device-id', 'device') + '-' + cls.test_suite_timestamp
                 data_path = os.path.join(get_config('--magneto-failed-data-dir'), data_path_suffix)
