@@ -6,15 +6,15 @@ Common usages
 Tag
 ---
 
-Magneto allows attaching tags to test cases and tests alike, using ``@tag.TAG_NAME``::
+Magneto allows attaching tags to test cases and tests alike, using ``@pytest.mark.TAG_NAME``::
 
-    @tag.cards
+    @pytest.mark.cards
     class CardsTestCase(BaseTestCase):
         """
         Tests example functionality
         """
 
-        @tag.toggle
+        @pytest.mark.toggle
         def test_cards_toggle(self):
             ...
 
@@ -27,9 +27,9 @@ Now I can choose to run only ``CardsTestCase`` using ``-k cards``::
 Skip
 ----
 
-Magneto allows conditional skipping for test cases and tests, using ``@skipif(CONDITION, reason=REASON)``::
+Magneto allows conditional skipping for test cases and tests, using ``@pytest.mark.skipif(CONDITION, reason=REASON)``::
 
-    @skipif(settings.param == False, reason='Skipped cause param is False')
+    @pytest.mark.skipif(settings.param == False, reason='Skipped cause param is False')
     class ExampleTestCase(BaseTestCase):
         """
         Tests example functionality
