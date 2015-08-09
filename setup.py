@@ -2,18 +2,18 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.33',
+    version='0.34',
     description='Magneto - Test Automation for Android',
     author='EverythingMe',
     author_email='automation@everything.me',
     url='http://github.com/EverythingMe/magneto',
     packages=find_packages(),
     install_requires=[
-        'pytest',
-        'uiautomator',
-        'futures',
-        'IPython',
-        'Click'
+        'pytest==2.7.2',
+        'uiautomator==0.1.35',
+        'futures==3.0.3',
+        'IPython==3.2.1',
+        'Click==4.1'
     ],
 
     entry_points={
