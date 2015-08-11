@@ -4,9 +4,9 @@ import logging
 import os
 import pytest
 
+from . import Magneto
 from .logger import Logger
 from .base import BaseTestCase
-from .magneto import Magneto
 from .utils import ADB, wait_for_device, unlock_device
 
 
