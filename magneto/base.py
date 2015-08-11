@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from .magneto import Magneto
+from . import Magneto
 from .logger import Logger
 from .utils import get_config
 from .utils.adb import ADB, ADBVideoCapture

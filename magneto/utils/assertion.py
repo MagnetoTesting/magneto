@@ -1,5 +1,5 @@
 import re
-from ..magneto import Magneto
+from .. import Magneto
 
 
 class Assert(object):
