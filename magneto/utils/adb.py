@@ -148,7 +148,7 @@ class RegexMatcher(object):
         return self._pattern.search(line)
 
     def __str__(self):
-        return self._pattern.pattern[:20]+'...'
+        return self._pattern.pattern
 
 
 class ADBLogWatch(threading.Thread):
