@@ -32,6 +32,34 @@ class Assert(object):
             raise AssertionError(cls._format_message(msg, default_msg))
 
     @classmethod
+    def not_current_package(cls, *expected_packages, **kwargs):
+        """
+        Checks current package not equals the expected.
+        Raises exception if timed out
+
+        :param expected_packages: package names
+        :param str msg: Overrides default exception message
+
+        Example::
+
+            # single package
+            Assert.not_current_package('com.android.chrome')
+
+            # any package
+            Assert.not_current_package('com.google.android.gm', 'com.android.email')
+        """
+        magneto = Magneto.instance()
+
+        found = magneto.wait_for_true(lambda: magneto.info['currentPackageName'] in expected_packages, **kwargs)
+
+        if found:
+            msg = kwargs.get('msg', None)
+            current_package = magneto.info['currentPackageName']
+            default_msg = "{0} is the current package".format(current_package)
+
+            raise AssertionError(cls._format_message(msg, default_msg))
+
+    @classmethod
     def true(cls, expr, msg=None):
         """
         Checks that the expression is true
