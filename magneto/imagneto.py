@@ -1,7 +1,7 @@
 import sys
 from IPython import embed
 
-from .magneto import Magneto
+from . import Magneto
 
 
 m = magneto = None

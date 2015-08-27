@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.36',
+    version='0.36.1',
     description='Magneto - Test Automation for Android',
     author='EverythingMe',
     author_email='automation@everything.me',
