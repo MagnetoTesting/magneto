@@ -33,24 +33,25 @@ class MagnetoPlugin(object):
         device_id = config.getoption('--device-id')
         clean_install = config.getoption('--clean-install')
 
-        Magneto.configure(device_id)
+        if not config.getoption('--collect-only', False):
+            Magneto.configure(device_id)
 
-        wait_for_device()
-        unlock_device()
+            wait_for_device()
+            unlock_device()
 
-        if apk_path:
-            if not apk_path.startswith('/'):
-                apk_path = os.path.abspath(os.path.join(os.getcwd(), apk_path))
+            if apk_path:
+                if not apk_path.startswith('/'):
+                    apk_path = os.path.abspath(os.path.join(os.getcwd(), apk_path))
 
-            if clean_install:
-                ADB.uninstall(app_package)
-            apk_installed = ADB.install(apk_path, '-r')
+                if clean_install:
+                    ADB.uninstall(app_package)
+                apk_installed = ADB.install(apk_path, '-r')
 
-            if not apk_installed:
-                raise RuntimeError('Could not install apk.')
+                if not apk_installed:
+                    raise RuntimeError('Could not install apk.')
 
-        # launch app
-        ADB.exec_cmd('shell am start {0}/{1}'.format(app_package, app_activity)).wait()
+            # launch app
+            ADB.exec_cmd('shell am start {0}/{1}'.format(app_package, app_activity)).wait()
 
     def pytest_unconfigure(self, config):
         BaseTestCase.unconfigure(config)
@@ -80,6 +81,16 @@ def main(log):
 @click.pass_context
 def run(ctx, tests_path):
     pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
+
+
+@main.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.argument('tests_path', default='.')
+@click.pass_context
+def report(ctx, tests_path):
+    pytest.main([tests_path, '-qq', '--report-disabled'] + ctx.args, plugins=[MagnetoPlugin()])
 
 
 @main.command()

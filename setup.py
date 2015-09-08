@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='magneto',
-    version='0.36.1',
+    version='0.37',
     description='Magneto - Test Automation for Android',
     author='EverythingMe',
     author_email='automation@everything.me',
@@ -13,7 +13,8 @@ setup(
         'uiautomator==0.1.35',
         'futures==3.0.3',
         'IPython==3.2.1',
-        'Click==4.1'
+        'Click==4.1',
+        'pytest-disable==0.2'
     ],
 
     entry_points={
