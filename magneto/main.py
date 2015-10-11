@@ -5,6 +5,7 @@ import os
 import pytest
 
 from . import Magneto
+import sys
 from .logger import Logger
 from .base import BaseTestCase
 from .utils import ADB, wait_for_device, unlock_device
@@ -80,7 +81,8 @@ def main(log):
 @click.argument('tests_path', default='.')
 @click.pass_context
 def run(ctx, tests_path):
-    pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
+    error_code = pytest.main(['-sv', tests_path] + ctx.args, plugins=[MagnetoPlugin()])
+    sys.exit(error_code)
 
 
 @main.command(context_settings=dict(
