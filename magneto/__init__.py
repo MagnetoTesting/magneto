@@ -154,6 +154,18 @@ class Magneto(threading.local, AutomatorDevice):
                 break
             yield selector
 
+    def screenshot(self, filename, scale=1.0, quality=100):
+        """take screenshot. overrides AutomatorDevice screenshot method in order
+        to use adb shell screencap instead of jsonrpc.takeScreenshot (works better on emulators)"""
+        device_file = "/mnt/sdcard/screenshot.png"
+        try:
+            screencap = self.server.adb.cmd("shell", "screencap", "-p", device_file)
+            screencap.wait()
+            pull = self.server.adb.cmd("pull", device_file, filename)
+            pull.wait()
+        finally:
+            self.server.adb.cmd("shell", "rm", device_file).wait()
+        return filename if pull.returncode is 0 else None
 
 class MagnetoDeviceObject(AutomatorDeviceObject):
     def __init__(self, device, selector):
