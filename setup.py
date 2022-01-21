@@ -12,7 +12,7 @@ setup(
         'pytest==2.7.2',
         'uiautomator==0.1.35',
         'futures==3.0.3',
-        'IPython==3.2.1',
+        'IPython==7.16.3',
         'Click==4.1',
         'pytest-disable==0.2'
     ],
